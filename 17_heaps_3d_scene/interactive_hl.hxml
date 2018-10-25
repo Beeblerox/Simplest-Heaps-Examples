@@ -1,0 +1,5 @@
+-lib heaps
+-lib hlsdl
+-hl interactive.hl
+-main PlayerMovement
+-D windowSize=1024x768
