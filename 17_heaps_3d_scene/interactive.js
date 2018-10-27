@@ -295,6 +295,7 @@ PlayerMovement.main = function() {
 PlayerMovement.__super__ = hxd_App;
 PlayerMovement.prototype = $extend(hxd_App.prototype,{
 	init: function() {
+		var _gthis = this;
 		this.light = new h3d_scene_DirLight(new h3d_Vector(0.3,-0.4,-0.9),this.s3d);
 		this.light.set_enableSpecular(true);
 		var _this = this.light.get_color();
@@ -354,7 +355,6 @@ PlayerMovement.prototype = $extend(hxd_App.prototype,{
 		this.walkingAnimation = this.cache.loadAnimation(hxd_Res.get_loader().loadCache("Model.FBX",hxd_res_Model));
 		this.worldBounds = new Rect(-10,-10,20,20);
 		var prim = new h3d_prim_Cube(this.worldBounds.width,this.worldBounds.height,1.0);
-		prim.translate(-0.5 * this.worldBounds.width,-0.5 * this.worldBounds.height,-0.5);
 		prim.unindex();
 		prim.addNormals();
 		prim.addUVs();
@@ -366,13 +366,31 @@ PlayerMovement.prototype = $extend(hxd_App.prototype,{
 		_this3.y = 0.69803921568627447;
 		_this3.z = 0.50196078431372548;
 		_this3.w = 0.;
-		floor.z = -0.5;
+		var v = this.worldBounds.x;
+		floor.x = v;
 		var f4 = 1;
 		var b4 = true;
 		if(b4) {
 			floor.flags |= f4;
 		} else {
 			floor.flags &= ~f4;
+		}
+		var v4 = this.worldBounds.y;
+		floor.y = v4;
+		var f5 = 1;
+		var b5 = true;
+		if(b5) {
+			floor.flags |= f5;
+		} else {
+			floor.flags &= ~f5;
+		}
+		floor.z = -1;
+		var f6 = 1;
+		var b6 = true;
+		if(b6) {
+			floor.flags |= f6;
+		} else {
+			floor.flags &= ~f6;
 		}
 		this.obstacles = [];
 		this.obstacles.push(differ_shapes_Polygon.rectangle(this.worldBounds.x - 1,this.worldBounds.y - 1,this.worldBounds.width + 1,1,false));
@@ -413,12 +431,12 @@ PlayerMovement.prototype = $extend(hxd_App.prototype,{
 			var _g4 = cube;
 			var v11 = _g4.scaleX * scale;
 			_g4.scaleX = v11;
-			var f5 = 1;
-			var b5 = true;
-			if(b5) {
-				_g4.flags |= f5;
+			var f7 = 1;
+			var b7 = true;
+			if(b7) {
+				_g4.flags |= f7;
 			} else {
-				_g4.flags &= ~f5;
+				_g4.flags &= ~f7;
 			}
 			var _g11 = cube;
 			var v21 = _g11.scaleY * scale;
@@ -447,23 +465,23 @@ PlayerMovement.prototype = $extend(hxd_App.prototype,{
 			} else {
 				cube.flags &= ~f31;
 			}
-			var v = this.worldBounds.x + Math.random() * (this.worldBounds.width - scale);
-			cube.x = v;
-			var f6 = 1;
-			var b6 = true;
-			if(b6) {
-				cube.flags |= f6;
+			var v5 = this.worldBounds.x + Math.random() * (this.worldBounds.width - scale);
+			cube.x = v5;
+			var f8 = 1;
+			var b8 = true;
+			if(b8) {
+				cube.flags |= f8;
 			} else {
-				cube.flags &= ~f6;
+				cube.flags &= ~f8;
 			}
-			var v4 = this.worldBounds.y + Math.random() * (this.worldBounds.height - scale);
-			cube.y = v4;
-			var f7 = 1;
-			var b7 = true;
-			if(b7) {
-				cube.flags |= f7;
+			var v6 = this.worldBounds.y + Math.random() * (this.worldBounds.height - scale);
+			cube.y = v6;
+			var f9 = 1;
+			var b9 = true;
+			if(b9) {
+				cube.flags |= f9;
 			} else {
-				cube.flags &= ~f7;
+				cube.flags &= ~f9;
 			}
 			this.obstacles.push(differ_shapes_Polygon.rectangle(cube.x,cube.y,scale,scale,false));
 		}
@@ -471,6 +489,14 @@ PlayerMovement.prototype = $extend(hxd_App.prototype,{
 		this.cameraDistance = 15;
 		this.cameraHeight = 5;
 		this.updateCamera();
+		this.interactive = new h3d_scene_Interactive(floor.getCollider(),this.s3d);
+		this.interactive.onMove = function(e) {
+			if(hxd_Key.isDown(0)) {
+				var dx = e.relX - _gthis.playerPosition.x;
+				var dy = e.relY - _gthis.playerPosition.y;
+				_gthis.playerDirection = Math.atan2(dy,dx);
+			}
+		};
 	}
 	,update: function(dt) {
 		var playerSpeed = 0.0;
@@ -479,6 +505,9 @@ PlayerMovement.prototype = $extend(hxd_App.prototype,{
 		}
 		if(hxd_Key.isDown(40)) {
 			--playerSpeed;
+		}
+		if(hxd_Key.isDown(0)) {
+			playerSpeed = 1;
 		}
 		var runningMultiplicator = 1.0;
 		if(hxd_Key.isDown(16)) {
@@ -5999,17 +6028,17 @@ h2d_Object.prototype = {
 			view.yMax = y15;
 		}
 		var a = bounds.xMin;
-		var b = view.xMin;
-		bounds.xMin = a < b ? b : a;
+		var b1 = view.xMin;
+		bounds.xMin = a < b1 ? b1 : a;
 		var a1 = bounds.yMin;
-		var b1 = view.yMin;
-		bounds.yMin = a1 < b1 ? b1 : a1;
+		var b2 = view.yMin;
+		bounds.yMin = a1 < b2 ? b2 : a1;
 		var a2 = bounds.xMax;
-		var b2 = view.xMax;
-		bounds.xMax = a2 > b2 ? b2 : a2;
+		var b3 = view.xMax;
+		bounds.xMax = a2 > b3 ? b3 : a2;
 		var a3 = bounds.yMax;
-		var b3 = view.yMax;
-		bounds.yMax = a3 > b3 ? b3 : a3;
+		var b4 = view.yMax;
+		bounds.yMax = a3 > b4 ? b4 : a3;
 	}
 	,drawFilters: function(ctx) {
 		if(!ctx.pushFilter(this)) {
@@ -12966,8 +12995,8 @@ var h3d_anim_Skin = function(name,vertexCount,bonesPerVertex) {
 	if(vertexCount > 0) {
 		var this1 = new Array(vertexCount * bonesPerVertex);
 		this.vertexJoints = this1;
-		var this2 = new Array(vertexCount * bonesPerVertex);
-		this.vertexWeights = this2;
+		var this11 = new Array(vertexCount * bonesPerVertex);
+		this.vertexWeights = this11;
 		this.envelop = [];
 	}
 };
@@ -17801,8 +17830,8 @@ h3d_impl_MemoryManager.prototype = {
 			indices.push(i);
 		}
 		this.triIndexes = h3d_Indexes.alloc(indices);
-		var this2 = new Array(0);
-		var indices1 = this2;
+		var this11 = new Array(0);
+		var indices1 = this11;
 		var p = 0;
 		var _g1 = 0;
 		var _g2 = 16383;
@@ -18858,9 +18887,9 @@ h3d_mat_MaterialDatabase.prototype = {
 				throw e;
 			}
 		}
-		var this2 = this.db;
+		var this11 = this.db;
 		var key1 = model.entry.get_directory();
-		var _this1 = this2;
+		var _this1 = this11;
 		var value1 = { v : value};
 		if(__map_reserved[key1] != null) {
 			_this1.setReserved(key1,value1);
@@ -22673,7 +22702,7 @@ h3d_pass_ShaderManager.prototype = {
 		var tid1 = 0;
 		var p4 = s2.textures;
 		while(p4 != null) {
-			var this2 = buf2.tex;
+			var this11 = buf2.tex;
 			var index1 = tid1++;
 			var opt2 = !h3d_pass_ShaderManager.STRICT;
 			var val1;
@@ -22694,7 +22723,7 @@ h3d_pass_ShaderManager.prototype = {
 				}
 				val1 = v11;
 			}
-			this2[index1] = val1;
+			this11[index1] = val1;
 			p4 = p4.next;
 		}
 		var p5 = s2.buffers;
@@ -22847,47 +22876,47 @@ h3d_prim_BigPrimitive.prototype = $extend(h3d_prim_Primitive.prototype,{
 				h3d_prim_BigPrimitive.PREV_BUFFER = null;
 			}
 			if(this.isStatic) {
-				var this2 = this.tmpBuf;
-				var _g1 = this2.pos;
+				var this11 = this.tmpBuf;
+				var _g1 = this11.pos;
 				var _g = 65535 * this.stride;
 				while(_g1 < _g) {
 					var i = _g1++;
-					if(this2.pos == this2.array.length) {
-						var newSize = this2.array.length << 1;
+					if(this11.pos == this11.array.length) {
+						var newSize = this11.array.length << 1;
 						if(newSize < 128) {
 							newSize = 128;
 						}
 						var newArray = new Float32Array(newSize);
-						newArray.set(this2.array);
-						this2.array = newArray;
+						newArray.set(this11.array);
+						this11.array = newArray;
 					}
-					this2.array[this2.pos++] = 0.;
+					this11.array[this11.pos++] = 0.;
 				}
 			}
 		}
 		if(!this.isStatic) {
-			var this3 = this.tmpBuf;
-			var _g11 = this3.pos;
+			var this12 = this.tmpBuf;
+			var _g11 = this12.pos;
 			var _g2 = vcount * this.stride + this.bufPos;
 			while(_g11 < _g2) {
 				var i1 = _g11++;
-				if(this3.pos == this3.array.length) {
-					var newSize1 = this3.array.length << 1;
+				if(this12.pos == this12.array.length) {
+					var newSize1 = this12.array.length << 1;
 					if(newSize1 < 128) {
 						newSize1 = 128;
 					}
 					var newArray1 = new Float32Array(newSize1);
-					newArray1.set(this3.array);
-					this3.array = newArray1;
+					newArray1.set(this12.array);
+					this12.array = newArray1;
 				}
-				this3.array[this3.pos++] = 0.;
+				this12.array[this12.pos++] = 0.;
 			}
 		}
 		if(this.tmpIdx == null) {
 			this.tmpIdx = h3d_prim_BigPrimitive.PREV_INDEX;
 			if(this.tmpIdx == null) {
-				var this4 = new Array(0);
-				this.tmpIdx = this4;
+				var this13 = new Array(0);
+				this.tmpIdx = this13;
 			} else {
 				h3d_prim_BigPrimitive.PREV_INDEX = null;
 			}
@@ -22896,8 +22925,8 @@ h3d_prim_BigPrimitive.prototype = $extend(h3d_prim_Primitive.prototype,{
 			var size = this.tmpIdx.length == 0 ? 1024 : this.tmpIdx.length;
 			var req = this.idxPos + icount;
 			while(size < req) size <<= 1;
-			var this5 = this.tmpIdx;
-			while(this5.length < size) this5.push(0);
+			var this14 = this.tmpIdx;
+			while(this14.length < size) this14.push(0);
 		}
 	}
 	,addPoint: function(x,y,z) {
@@ -23869,8 +23898,8 @@ h3d_prim_Polygon.prototype = $extend(h3d_prim_MeshPrimitive.prototype,{
 	,getCollider: function() {
 		var this1 = new Array(this.points.length * 3);
 		var vertexes = this1;
-		var this2 = new Array(this.idx.length);
-		var indexes = this2;
+		var this11 = new Array(this.idx.length);
+		var indexes = this11;
 		var vid = 0;
 		var _g = 0;
 		var _g1 = this.points;
@@ -24419,8 +24448,8 @@ h3d_prim_HMDModel.prototype = $extend(h3d_prim_MeshPrimitive.prototype,{
 		}
 		var pol = new h3d_prim_Polygon(pts,idx);
 		pol.addNormals();
-		var this2 = hxd__$FloatBuffer_Float32Expand_$Impl_$._new(0);
-		var v = this2;
+		var this11 = hxd__$FloatBuffer_Float32Expand_$Impl_$._new(0);
+		var v = this11;
 		var _g12 = 0;
 		var _g5 = this.data.vertexCount;
 		while(_g12 < _g5) {
@@ -28202,12 +28231,12 @@ h3d_scene_Scene.prototype = $extend(h3d_scene_Object.prototype,{
 						var l_y1 = r1.ly;
 						var l_z1 = r1.lz;
 						var l_w1 = 1.;
-						var px3 = l_x1 * m._11 + l_y1 * m._21 + l_z1 * m._31;
-						var py3 = l_x1 * m._12 + l_y1 * m._22 + l_z1 * m._32;
-						var pz3 = l_x1 * m._13 + l_y1 * m._23 + l_z1 * m._33;
-						l_x1 = px3;
-						l_y1 = py3;
-						l_z1 = pz3;
+						var px11 = l_x1 * m._11 + l_y1 * m._21 + l_z1 * m._31;
+						var py11 = l_x1 * m._12 + l_y1 * m._22 + l_z1 * m._32;
+						var pz11 = l_x1 * m._13 + l_y1 * m._23 + l_z1 * m._33;
+						l_x1 = px11;
+						l_y1 = py11;
+						l_z1 = pz11;
 						r1.lx = l_x1;
 						r1.ly = l_y1;
 						r1.lz = l_z1;
@@ -28237,20 +28266,20 @@ h3d_scene_Scene.prototype = $extend(h3d_scene_Object.prototype,{
 					var p_w2 = _this.w;
 					p_w2 = 1;
 					var m1 = i1.absPos;
-					var px4 = p_x2 * m1._11 + p_y2 * m1._21 + p_z2 * m1._31 + p_w2 * m1._41;
-					var py4 = p_x2 * m1._12 + p_y2 * m1._22 + p_z2 * m1._32 + p_w2 * m1._42;
-					var pz4 = p_x2 * m1._13 + p_y2 * m1._23 + p_z2 * m1._33 + p_w2 * m1._43;
-					p_x2 = px4;
-					p_y2 = py4;
-					p_z2 = pz4;
+					var px3 = p_x2 * m1._11 + p_y2 * m1._21 + p_z2 * m1._31 + p_w2 * m1._41;
+					var py3 = p_x2 * m1._12 + p_y2 * m1._22 + p_z2 * m1._32 + p_w2 * m1._42;
+					var pz3 = p_x2 * m1._13 + p_y2 * m1._23 + p_z2 * m1._33 + p_w2 * m1._43;
+					p_x2 = px3;
+					p_y2 = py3;
+					p_z2 = pz3;
 					var m2 = this.camera.m;
-					var px5 = p_x2 * m2._11 + p_y2 * m2._21 + p_z2 * m2._31 + p_w2 * m2._41;
-					var py5 = p_x2 * m2._12 + p_y2 * m2._22 + p_z2 * m2._32 + p_w2 * m2._42;
-					var pz5 = p_x2 * m2._13 + p_y2 * m2._23 + p_z2 * m2._33 + p_w2 * m2._43;
+					var px4 = p_x2 * m2._11 + p_y2 * m2._21 + p_z2 * m2._31 + p_w2 * m2._41;
+					var py4 = p_x2 * m2._12 + p_y2 * m2._22 + p_z2 * m2._32 + p_w2 * m2._42;
+					var pz4 = p_x2 * m2._13 + p_y2 * m2._23 + p_z2 * m2._33 + p_w2 * m2._43;
 					var iw = 1 / (p_x2 * m2._14 + p_y2 * m2._24 + p_z2 * m2._34 + p_w2 * m2._44);
-					p_x2 = px5 * iw;
-					p_y2 = py5 * iw;
-					p_z2 = pz5 * iw;
+					p_x2 = px4 * iw;
+					p_y2 = py4 * iw;
+					p_z2 = pz4 * iw;
 					p_w2 = 1;
 					i1.hitPoint.w = p_z2 + wfactor;
 				}
@@ -29568,8 +29597,8 @@ var h3d_shader_ShaderBuffers = function(s) {
 	this.tex = this1;
 	var tmp;
 	if(s.bufferCount > 0) {
-		var this2 = new Array(s.bufferCount);
-		tmp = this2;
+		var this11 = new Array(s.bufferCount);
+		tmp = this11;
 	} else {
 		tmp = null;
 	}
@@ -29594,8 +29623,8 @@ h3d_shader_ShaderBuffers.prototype = {
 			this.tex = this1;
 		}
 		if(nb > 0 && (this.buffers == null || this.buffers.length < nb)) {
-			var this2 = new Array(nb);
-			this.buffers = this2;
+			var this11 = new Array(nb);
+			this.buffers = this11;
 		}
 	}
 	,__class__: h3d_shader_ShaderBuffers
@@ -33468,9 +33497,6 @@ hxd_Event.prototype = {
 		case 0:case 1:case 10:
 			tmp1 = ",button=" + this.button;
 			break;
-		case 2:case 3:case 4:case 6:case 7:case 12:
-			tmp1 = "";
-			break;
 		case 5:
 			tmp1 = ",wheelDelta=" + this.wheelDelta;
 			break;
@@ -33479,6 +33505,9 @@ hxd_Event.prototype = {
 			break;
 		case 11:
 			tmp1 = ",charCode=" + this.charCode;
+			break;
+		case 2:case 3:case 4:case 6:case 7:case 12:
+			tmp1 = "";
 			break;
 		}
 		return tmp + tmp1;
@@ -34769,9 +34798,6 @@ hxd_SceneEvents.prototype = {
 		case 1:
 			checkPush = true;
 			break;
-		case 2:case 12:
-			checkOver = true;
-			break;
 		case 5:case 8:case 9:case 11:
 			if(this.currentFocus != null) {
 				event.relX = event.relY = 0;
@@ -34782,6 +34808,9 @@ hxd_SceneEvents.prototype = {
 					return;
 				}
 			}
+			break;
+		case 2:case 12:
+			checkOver = true;
 			break;
 		default:
 		}
@@ -35706,8 +35735,8 @@ hxd_fmt_hmd_Library.prototype = {
 		var models = modelIndex < 0 ? this.header.models : [this.header.models[modelIndex]];
 		var this1 = hxd__$FloatBuffer_Float32Expand_$Impl_$._new(0);
 		var outVertex = this1;
-		var this2 = new Array(0);
-		var outIndex = this2;
+		var this11 = new Array(0);
+		var outIndex = this11;
 		var stride = 0;
 		var mid = -1;
 		var _g = 0;
@@ -35877,8 +35906,8 @@ hxd_fmt_hmd_Library.prototype = {
 		if(material == null) {
 			var this1 = new Array(stride * geom.vertexCount);
 			buf.vertexes = this1;
-			var this2 = new Array(geom.get_indexCount());
-			buf.indexes = this2;
+			var this11 = new Array(geom.get_indexCount());
+			buf.indexes = this11;
 			var w = 0;
 			var _g12 = 0;
 			var _g5 = geom.vertexCount;
@@ -35928,12 +35957,12 @@ hxd_fmt_hmd_Library.prototype = {
 			}
 		} else {
 			var icount = geom.indexCounts[material];
-			var this3 = new Array(geom.vertexCount);
-			var vmap = this3;
-			var this4 = hxd__$FloatBuffer_Float32Expand_$Impl_$._new(0);
-			var vertexes = this4;
-			var this5 = new Array(icount);
-			buf.indexes = this5;
+			var this12 = new Array(geom.vertexCount);
+			var vmap = this12;
+			var this13 = hxd__$FloatBuffer_Float32Expand_$Impl_$._new(0);
+			var vertexes = this13;
+			var this14 = new Array(icount);
+			buf.indexes = this14;
 			var r2 = 0;
 			var vcount = 0;
 			var _g14 = 0;
@@ -36092,13 +36121,13 @@ hxd_fmt_hmd_Library.prototype = {
 				}
 				buf.indexes[i5] = rid - 1;
 			}
-			var this6 = vertexes;
+			var this15 = vertexes;
 			var _g8 = [];
 			var _g25 = 0;
-			var _g15 = this6.pos;
+			var _g15 = this15.pos;
 			while(_g25 < _g15) {
 				var i7 = _g25++;
-				_g8.push(this6.array[i7]);
+				_g8.push(this15.array[i7]);
 			}
 			buf.vertexes = _g8;
 		}
@@ -36425,8 +36454,8 @@ hxd_fmt_hmd_Library.prototype = {
 				l.addCurve(o.name,fl,rot,scale);
 			}
 			if((o.flags & 1 << hxd_fmt_hmd_AnimationFlag.HasUV._hx_index) != 0) {
-				var this2 = new Array(a.frames * 2);
-				var fl1 = this2;
+				var this11 = new Array(a.frames * 2);
+				var fl1 = this11;
 				var size1 = 8 * a.frames;
 				var data1 = new haxe_io_Bytes(new ArrayBuffer(size1));
 				entry.read(data1,0,size1);
@@ -36439,8 +36468,8 @@ hxd_fmt_hmd_Library.prototype = {
 				l.addUVCurve(o.name,fl1);
 			}
 			if((o.flags & 1 << hxd_fmt_hmd_AnimationFlag.HasAlpha._hx_index) != 0) {
-				var this3 = new Array(a.frames);
-				var fl2 = this3;
+				var this12 = new Array(a.frames);
+				var fl2 = this12;
 				var size2 = 4 * a.frames;
 				var data2 = new haxe_io_Bytes(new ArrayBuffer(size2));
 				entry.read(data2,0,size2);
@@ -36458,8 +36487,8 @@ hxd_fmt_hmd_Library.prototype = {
 				while(_g23 < _g33.length) {
 					var p1 = _g33[_g23];
 					++_g23;
-					var this4 = new Array(a.frames);
-					var fl3 = this4;
+					var this13 = new Array(a.frames);
+					var fl3 = this13;
 					var size3 = 4 * a.frames;
 					var data3 = new haxe_io_Bytes(new ArrayBuffer(size3));
 					entry.read(data3,0,size3);
@@ -36484,8 +36513,8 @@ hxd_fmt_hmd_Library.prototype = {
 		var w = this.getBuffers(geom,[new hxd_fmt_hmd_GeometryFormat("weights",3)]).vertexes;
 		var this1 = new Array(skin.vertexCount * skin.bonesPerVertex);
 		skin.vertexWeights = this1;
-		var this2 = new Array(skin.vertexCount * skin.bonesPerVertex);
-		skin.vertexJoints = this2;
+		var this11 = new Array(skin.vertexCount * skin.bonesPerVertex);
+		skin.vertexJoints = this11;
 		var _g1 = 0;
 		var _g = skin.vertexWeights.length;
 		while(_g1 < _g) {
@@ -37352,11 +37381,9 @@ hxd_prefab_Context.prototype = {
 		while(parts.length > 0) {
 			var v = null;
 			var pname = parts.shift();
-			var _g_i = 0;
-			var _g_a = root.children;
-			var _g_l = _g_a.length;
-			while(_g_i < _g_l) {
-				var o = _g_a[_g_i++];
+			var _g = new hxd_impl_ArrayIterator_$h3d_$scene_$Object(root.children);
+			while(_g.i < _g.l) {
+				var o = _g.a[_g.i++];
 				if(o.name == pname) {
 					v = o;
 					break;
@@ -37371,8 +37398,8 @@ hxd_prefab_Context.prototype = {
 			if(v == null) {
 				var parts2 = path.split(".");
 				var _g1 = 0;
-				var _g = parts.length;
-				while(_g1 < _g) {
+				var _g2 = parts.length;
+				while(_g1 < _g2) {
 					var i = _g1++;
 					parts2.pop();
 				}
@@ -37619,11 +37646,9 @@ hxd_prefab_ContextShared.prototype = {
 			if(m != null) {
 				ret.push(m);
 			}
-			var _g_i = 0;
-			var _g_a = o.children;
-			var _g_l = _g_a.length;
-			while(_g_i < _g_l) {
-				var child = _g_a[_g_i++];
+			var _g = new hxd_impl_ArrayIterator_$h3d_$scene_$Object(o.children);
+			while(_g.i < _g.l) {
+				var child = _g.a[_g.i++];
 				if(childObjs.indexOf(child) < 0) {
 					rec(child);
 				}
@@ -37659,11 +37684,9 @@ hxd_prefab_ContextShared.prototype = {
 					ret.push(m.material);
 				}
 			}
-			var _g_i = 0;
-			var _g_a = o.children;
-			var _g_l = _g_a.length;
-			while(_g_i < _g_l) {
-				var child = _g_a[_g_i++];
+			var _g2 = new hxd_impl_ArrayIterator_$h3d_$scene_$Object(o.children);
+			while(_g2.i < _g2.l) {
+				var child = _g2.a[_g2.i++];
 				if(childObjs.indexOf(child) < 0) {
 					rec(child);
 				}

@@ -78,6 +78,8 @@ class PlayerMovement extends hxd.App {
 	// Collision bounds for every obstacle in the scene
 	var obstacles:Array<differ.shapes.Polygon>;
 
+	var interactive:h3d.scene.Interactive;
+
 	override function init() 
 	{
 		// let's create and setup lighing on the scene
@@ -104,7 +106,7 @@ class PlayerMovement extends hxd.App {
 		// create cube primitive which we will use for floor object
 		var prim = new h3d.prim.Cube(worldBounds.width, worldBounds.height, 1.0);
 		// translate it so its center will be at the center of the cube
-		prim.translate( -0.5 * worldBounds.width, -0.5 * worldBounds.height, -0.5);
+	//	prim.translate( -0.5 * worldBounds.width, -0.5 * worldBounds.height, -0.5);
 		// unindex the faces to create hard edges normals
 		prim.unindex();
 		// add face normals
@@ -120,7 +122,9 @@ class PlayerMovement extends hxd.App {
 		// set the cube color
 		floor.material.color.setColor(0xFFB280);
 		// put it under player
-		floor.z = -0.5;
+		floor.x = worldBounds.x;
+		floor.y = worldBounds.y;
+		floor.z = -1;
 
 		obstacles = [];
 		// create wall obstacles for our location (they won't have visual representation):
@@ -185,12 +189,24 @@ class PlayerMovement extends hxd.App {
 		cameraDistance = 15;
 		cameraHeight = 5;
 		updateCamera();
+
+		interactive = new h3d.scene.Interactive(floor.getCollider(), s3d);
+		interactive.onMove = function(e:hxd.Event) 
+		{
+			if (hxd.Key.isDown(hxd.Key.MOUSE_LEFT))
+			{
+				var dx = e.relX - playerPosition.x;
+				var dy = e.relY - playerPosition.y;
+				playerDirection = Math.atan2(dy, dx);
+			}
+		}
 	}
 	
 	override function update(dt:Float) 
 	{
 		// check whether player moves forward or backward
 		var playerSpeed = 0.0;
+
 		if (hxd.Key.isDown(hxd.Key.UP))
 		{
 			playerSpeed += 1;
@@ -198,6 +214,11 @@ class PlayerMovement extends hxd.App {
 		if (hxd.Key.isDown(hxd.Key.DOWN))
 		{
 			playerSpeed -= 1;
+		}
+		
+		if (hxd.Key.isDown(hxd.Key.MOUSE_LEFT))
+		{
+			playerSpeed = 1;
 		}
 
 		// check if player is running
