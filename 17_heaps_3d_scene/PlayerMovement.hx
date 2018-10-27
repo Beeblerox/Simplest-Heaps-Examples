@@ -28,6 +28,10 @@ class Rect
 	}
 }
 
+/**
+ * This example uses differ library for collision detection
+ * You can install it from haxelib: `haxelib install differ` 
+ **/
 class PlayerMovement extends hxd.App {
 
 	// Light source for our scene
@@ -58,12 +62,21 @@ class PlayerMovement extends hxd.App {
 	var movementSpeed:Float = 0.0;
 
 	// some player movement characteristics
-	var walkSpeed:Float = 0.02;
+	var walkSpeed:Float = 0.04;
 	var turnSpeed:Float = 0.01;
 
+	// world's bounding rectangle
 	var worldBounds:Rect;
 
 	var walkingAnimation:h3d.anim.Animation;
+
+	// Cylinder mesh to visualize collision bounds of player object
+	var cylinder:h3d.scene.Mesh;
+
+	// Actual collision object for player object
+	var circle:differ.shapes.Circle;
+	// Collision bounds for every obstacle in the scene
+	var obstacles:Array<differ.shapes.Polygon>;
 
 	override function init() 
 	{
@@ -81,8 +94,9 @@ class PlayerMovement extends hxd.App {
 		s3d.addChild(player);
 
 		playerPosition = new Point(player.x, player.y);
-		playerDirection = Math.PI / 2; //0.0;
+		playerDirection = Math.PI / 2;
 
+		// load walking animation from the cache
 		walkingAnimation = cache.loadAnimation(hxd.Res.Model);
 
 		worldBounds = new Rect(-10, -10, 20, 20);
@@ -107,6 +121,65 @@ class PlayerMovement extends hxd.App {
 		floor.material.color.setColor(0xFFB280);
 		// put it under player
 		floor.z = -0.5;
+
+		obstacles = [];
+		// create wall obstacles for our location (they won't have visual representation):
+		// 1. upper wall
+		obstacles.push(differ.shapes.Polygon.rectangle(worldBounds.x - 1, worldBounds.y - 1, worldBounds.width + 1, 1, false));
+		// 2. right wall
+		obstacles.push(differ.shapes.Polygon.rectangle(worldBounds.x + worldBounds.width, worldBounds.y - 1, 1, worldBounds.height + 1, false));
+		// 3. bottom wall
+		obstacles.push(differ.shapes.Polygon.rectangle(worldBounds.x, worldBounds.y + worldBounds.height, worldBounds.width + 1, 1, false));
+		// 4. left wall
+		obstacles.push(differ.shapes.Polygon.rectangle(worldBounds.x - 1, worldBounds.y, 1, worldBounds.height + 1, false));
+
+		// create cylinder primitive to visualize collision shape of character.
+		var prim = new h3d.prim.Cylinder(12, 0.35, 0.1);
+		// translate it so its center will be at the bottom's center
+		// unindex the faces to create hard edges normals
+		// add face normals
+		prim.addNormals();
+		// add texture coordinates
+		prim.addTCoords();
+		// create colored mesh
+		cylinder = new h3d.scene.Mesh(prim, s3d);
+		// set the cylinder color
+		cylinder.material.color.setColor(0x00ff00);
+		cylinder.material.receiveShadows = false;
+		cylinder.material.mainPass.culling = None;
+
+		// create actual collision object for player
+		circle = new differ.shapes.Circle(0, 0, 0.35);
+
+		// let's create obstacles for our level:
+		// create cube primitive which we will use for obstacle objects
+		var prim = new h3d.prim.Cube(1.0, 1.0, 1.0);
+		// unindex the faces to create hard edges normals
+		prim.unindex();
+		// add face normals
+		prim.addNormals();
+		// add texture coordinates
+		prim.addUVs();
+		for (i in 0...50)
+		{
+			// create mesh object which will be rendered on the scene
+			var cube = new h3d.scene.Mesh(prim, s3d);
+			// set random color
+			cube.material.color.setColor(Std.int(Math.random() * 0xff0000));
+			// disable shadows
+			cube.material.receiveShadows = false;
+			cube.material.shadows = false;
+			// scale and place it randomly on the scene
+			var scale = 0.3 + 0.7 * Math.random();	// scale will be in the range from 0.3 to 1.0
+			cube.scale(scale);
+			cube.x = worldBounds.x + Math.random() * (worldBounds.width - scale);
+			cube.y = worldBounds.y + Math.random() * (worldBounds.height - scale);
+			
+			// create actual collision object for obstacle
+			obstacles.push(differ.shapes.Polygon.square(cube.x, cube.y, scale, false));
+		}
+
+		collideWithObstacles();
 		
 		// setup camera params
 		cameraDistance = 15;
@@ -160,16 +233,8 @@ class PlayerMovement extends hxd.App {
 			playerPosition.x += Math.cos(playerDirection) * walkSpeed * playerSpeed;
 			playerPosition.y += Math.sin(playerDirection) * walkSpeed * playerSpeed;
 
-			// Limit player movement, so it won't go out of world's bounds
-			playerPosition.x = Math.min(worldBounds.x + worldBounds.width, playerPosition.x);
-			playerPosition.x = Math.max(worldBounds.x, playerPosition.x);
-
-			playerPosition.y = Math.min(worldBounds.y + worldBounds.height, playerPosition.y);
-			playerPosition.y = Math.max(worldBounds.y, playerPosition.y);
-
-			// and finally set it's position
-			player.x = playerPosition.x;
-			player.y = playerPosition.y;
+			// Check collisions with each obstacle on the scene
+			collideWithObstacles();
 
 			// change player's animation if its speed has been changed
 			if (movementSpeed != playerSpeed)
@@ -209,6 +274,38 @@ class PlayerMovement extends hxd.App {
 		
 		// and don't forget to update camera's position
 		updateCamera();
+	}
+
+	function collideWithObstacles()
+	{
+		circle.x = playerPosition.x;
+		circle.y = playerPosition.y;
+		
+		for (i in 0...obstacles.length)
+		{
+			var obstacle = obstacles[i];
+
+			// check collision between circle (player) and rectangular obstacle (box or wall)
+			var collideInfo = differ.Collision.shapeWithShape(circle, obstacle);
+			if (collideInfo != null) 
+			{
+				// if there is collision then we need to resolve collision.
+				// in our case we just move player outside of bounds of the box
+				circle.x += collideInfo.separationX;
+				circle.y += collideInfo.separationY;
+			}
+		}
+
+		playerPosition.x = circle.x;
+		playerPosition.y = circle.y;
+
+		// and finally set player's position
+		player.x = playerPosition.x;
+		player.y = playerPosition.y;
+
+		// and player's marker position
+		cylinder.x = playerPosition.x;
+		cylinder.y = playerPosition.y;
 	}
 
 	function updateCamera()

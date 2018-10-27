@@ -1,4 +1,5 @@
 -lib heaps
+-lib differ
 -js interactive.js
 -main PlayerMovement
 -debug
