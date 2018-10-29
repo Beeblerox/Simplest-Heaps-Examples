@@ -1,0 +1,25 @@
+{
+	// See https://go.microsoft.com/fwlink/?LinkId=733558
+	// for the documentation about the tasks.json format
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "haxe",
+			"args": "active configuration",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+		{
+			"label": "HeapsJS",
+			"type": "hxml",
+			"file": "game_js.hxml"
+		},
+		{
+			"label": "HeapsHL",
+			"type": "hxml",
+			"file": "game_hl.hxml"
+		}
+	]
+}
