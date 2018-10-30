@@ -23,6 +23,7 @@ class Game extends hxd.App
         flow.isVertical = false;
         // set max width
         flow.maxWidth = s2d.width - 100;
+
         // set min width, so width of Flow object won't be less than this value
         flow.minWidth = 200;
         // set multiline to true, so if total width of added objects is more than max width, then new line will be started
@@ -52,6 +53,16 @@ class Game extends hxd.App
         flow.backgroundTile = hxd.Res.load("space.png").toImage().toTile();
         flow.borderWidth = flow.borderHeight = 2;
 
+        // Get flow properties of the first element added to flow object.
+        // We use index of 1 because first actual child of flow object is background border object.
+        var flowProp = flow.getProperties(flow.getChildAt(1));
+        if (flowProp != null)
+        {
+            // set align specific to this object
+            flowProp.horizontalAlign = Left;
+            flowProp.verticalAlign = Bottom;
+        }
+
         // recalculate positions of added objects
         flow.needReflow = true;
         flow.reflow();
@@ -61,7 +72,7 @@ class Game extends hxd.App
     {
         // lets change size of flow object, so we could see it in action
         flow.maxWidth = Std.int(s2d.mouseX - flow.x);
-        // and recalculate object positions inside it.
+        // and recalculate object positions inside
         flow.reflow();
     }
 }
