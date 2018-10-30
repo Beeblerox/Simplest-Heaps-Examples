@@ -23,6 +23,8 @@ class Game extends hxd.App
         flow.isVertical = false;
         // set max width
         flow.maxWidth = s2d.width - 100;
+        // set min width, so width of Flow object won't be less than this value
+        flow.minWidth = 200;
         // set multiline to true, so if total width of added objects is more than max width, then new line will be started
         flow.multiline = true;
         flow.x = 0.5 * (s2d.width - flow.maxWidth);
@@ -58,10 +60,8 @@ class Game extends hxd.App
     override function update(dt:Float) 
     {
         // lets change size of flow object, so we could see it in action
-        if (s2d.mouseX > flow.x + 150)
-        {
-            flow.maxWidth = Std.int(s2d.mouseX - flow.x);
-            flow.reflow();
-        }
+        flow.maxWidth = Std.int(s2d.mouseX - flow.x);
+        // and recalculate object positions inside it.
+        flow.reflow();
     }
 }
