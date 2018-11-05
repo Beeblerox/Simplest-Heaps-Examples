@@ -30,7 +30,7 @@ class Rect
 
 /**
  * This example uses `differ` library for collision detection.
- * You can install it from git: `haxelib git differ https://github.com/Beeblerox/differ.git`
+ * You can install it from git: `haxelib git differ https://github.com/snowkit/differ.git`
  * (haxelib version of `differ` currently is incompatible with Haxe 4.0.0.5preview or higher)
  **/
 class PlayerMovement extends hxd.App {
