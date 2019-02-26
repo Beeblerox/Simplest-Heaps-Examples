@@ -44,7 +44,7 @@ class Game extends hxd.App
         {
             for (x in 0...Std.int(tileImage.width / tw))
             {
-                var t = tileImage.sub(x * tw, y * th, tw, th, 0, -th);
+                var t = tileImage.sub(x * tw, y * th, tw, th, 0, 0);
                 tiles.push(t);
             }
         }
