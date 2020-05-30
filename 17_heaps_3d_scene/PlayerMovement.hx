@@ -36,7 +36,7 @@ class Rect
 class PlayerMovement extends hxd.App {
 
 	// Light source for our scene
-	var light : h3d.scene.DirLight;
+	var light : h3d.scene.fwd.DirLight;
 
 	// player object, which we will controll
 	var player : h3d.scene.Object;
@@ -84,7 +84,7 @@ class PlayerMovement extends hxd.App {
 	override function init() 
 	{
 		// let's create and setup lighing on the scene
-		light = new h3d.scene.DirLight(new h3d.Vector( 0.3, -0.4, -0.9), s3d);
+		light = new h3d.scene.fwd.DirLight(new h3d.Vector( 0.3, -0.4, -0.9), s3d);
 		light.enableSpecular = true;
 		light.color.set(0.28, 0.28, 0.28);
 		s3d.lightSystem.ambientLight.set(0.74, 0.74, 0.74);

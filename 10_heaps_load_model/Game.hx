@@ -26,7 +26,7 @@ class Game extends hxd.App
         obj.playAnimation(anim);
 
         // Настраиваем освещение на сцене
-        var light = new h3d.scene.DirLight(new h3d.Vector( 0.3, -0.4, -0.9), s3d);
+        var light = new h3d.scene.fwd.DirLight(new h3d.Vector( 0.3, -0.4, -0.9), s3d);
 		light.enableSpecular = true;
 		light.color.set(0.28, 0.28, 0.28);
 		s3d.lightSystem.ambientLight.set(0.74, 0.74, 0.74);
